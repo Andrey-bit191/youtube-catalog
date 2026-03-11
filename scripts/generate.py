@@ -2,7 +2,7 @@ import requests
 import xml.etree.ElementTree as ET
 import json
 
-URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UC0lG6IH2cQd5V7Hn1j6f3hQ"
+URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCdODFw-zhvUGCgc3QsnAagw"
 
 headers = {
     "User-Agent": "Mozilla/5.0"
