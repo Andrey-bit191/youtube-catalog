@@ -1,36 +1,19 @@
 import requests
+import xml.etree.ElementTree as ET
 import json
-import re
 
-CHANNEL = "https://www.youtube.com/@PulseSignalOfficial/videos"
+url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCyIYw0p9xI9qFv4g3uYt7sA"
 
-headers = {
-    "User-Agent": "Mozilla/5.0"
-}
+response = requests.get(url)
 
-html = requests.get(CHANNEL, headers=headers).text
-
-data = re.search(r"var ytInitialData = ({.*?});", html)
-
-if not data:
-    print("No data found")
-    exit()
-
-json_data = json.loads(data.group(1))
+root = ET.fromstring(response.content)
 
 videos = []
 
-items = json_data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]["tabRenderer"]["content"]["richGridRenderer"]["contents"]
+for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
 
-for item in items:
-
-    if "richItemRenderer" not in item:
-        continue
-
-    video = item["richItemRenderer"]["content"]["videoRenderer"]
-
-    video_id = video["videoId"]
-    title = video["title"]["runs"][0]["text"]
+    video_id = entry.find("{http://www.youtube.com/xml/schemas/2015}videoId").text
+    title = entry.find("{http://www.w3.org/2005/Atom}title").text
 
     videos.append({
         "videoId": video_id,
@@ -39,7 +22,7 @@ for item in items:
         "url": f"https://youtube.com/watch?v={video_id}"
     })
 
-with open("videos.json", "w", encoding="utf8") as f:
-    json.dump(videos, f, indent=2, ensure_ascii=False)
+with open("videos.json", "w", encoding="utf-8") as f:
+    json.dump(videos, f, indent=2)
 
-print("Videos:", len(videos))
+print("Videos found:", len(videos))
