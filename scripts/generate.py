@@ -2,11 +2,24 @@ import requests
 import xml.etree.ElementTree as ET
 import json
 
-url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCyIYw0p9xI9qFv4g3uYt7sA"
+URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCyIYw0p9xI9qFv4g3uYt7sA"
 
-response = requests.get(url)
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
 
-root = ET.fromstring(response.content)
+response = requests.get(URL, headers=headers)
+
+if response.status_code != 200:
+    print("Error loading RSS:", response.status_code)
+    exit()
+
+try:
+    root = ET.fromstring(response.content)
+except Exception as e:
+    print("XML parse error:", e)
+    print(response.text[:500])
+    exit()
 
 videos = []
 
@@ -23,6 +36,6 @@ for entry in root.findall("{http://www.w3.org/2005/Atom}entry"):
     })
 
 with open("videos.json", "w", encoding="utf-8") as f:
-    json.dump(videos, f, indent=2)
+    json.dump(videos, f, indent=2, ensure_ascii=False)
 
 print("Videos found:", len(videos))
