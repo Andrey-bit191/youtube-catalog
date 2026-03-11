@@ -6,7 +6,7 @@ CHANNEL_ID = "UCdODFw-zhvUGCgc3QsnAag"
 
 playlist_id = "UU" + CHANNEL_ID[2:]
 
-url = f"https://www.youtube.com/playlist?list={PLMuD5Neh5bbgF6Ng6-rasUscIo1Kts4Ck&index}"
+url = f"https://www.youtube.com/playlist?list={playlist_id}"
 
 html = requests.get(url).text
 
