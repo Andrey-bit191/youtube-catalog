@@ -2,25 +2,44 @@ import requests
 import json
 import re
 
-CHANNEL_ID = "UCdODFw-zhvUGCgc3QsnAag"
+CHANNEL = "https://www.youtube.com/@PulseSignalOfficial/videos"
 
-playlist_id = "UU" + CHANNEL_ID[2:]
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
 
-url = f"https://www.youtube.com/playlist?list={playlist_id}"
+html = requests.get(CHANNEL, headers=headers).text
 
-html = requests.get(url).text
+data = re.search(r"var ytInitialData = ({.*?});", html)
 
-video_ids = re.findall(r"watch\\?v=(.{11})", html)
+if not data:
+    print("No data found")
+    exit()
 
-unique_ids = list(dict.fromkeys(video_ids))
+json_data = json.loads(data.group(1))
 
 videos = []
 
-for vid in unique_ids:
+items = json_data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]["tabRenderer"]["content"]["richGridRenderer"]["contents"]
+
+for item in items:
+
+    if "richItemRenderer" not in item:
+        continue
+
+    video = item["richItemRenderer"]["content"]["videoRenderer"]
+
+    video_id = video["videoId"]
+    title = video["title"]["runs"][0]["text"]
+
     videos.append({
-        "videoId": vid,
-        "title": ""
+        "videoId": video_id,
+        "title": title,
+        "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+        "url": f"https://youtube.com/watch?v={video_id}"
     })
 
-with open("videos.json","w") as f:
-    json.dump(videos,f,indent=2)
+with open("videos.json", "w", encoding="utf8") as f:
+    json.dump(videos, f, indent=2, ensure_ascii=False)
+
+print("Videos:", len(videos))
