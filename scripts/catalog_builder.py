@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 
-CHANNEL = "https://www.youtube.com/@PulseSignalOfficial"
+CHANNEL = "https://www.youtube.com/@PulseSignalOfficial/videos"
 
 CATEGORIES = {
  "master": "#Master",
@@ -19,21 +19,16 @@ PAGE_SIZE = 20
 print("Scanning channel...")
 
 result = subprocess.run(
- ["yt-dlp","--dump-json","--playlist-end","2000",CHANNEL],
+ ["yt-dlp","--dump-single-json",CHANNEL],
  capture_output=True,
  text=True
 )
 
 print(result.stdout[:1000])
 
-videos = []
+data = json.loads(result.stdout)
 
-for line in result.stdout.splitlines():
- try:
-  data = json.loads(line)
-  videos.append(data)
- except:
-  pass
+videos = data.get("entries", [])
 
 catalog = []
 categories = {k: [] for k in CATEGORIES}
