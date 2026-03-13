@@ -24,8 +24,6 @@ result = subprocess.run(
  text=True
 )
 
-print(result.stdout[:1000])
-
 data = json.loads(result.stdout)
 
 videos = data.get("entries", [])
@@ -35,8 +33,14 @@ categories = {k: [] for k in CATEGORIES}
 
 for v in videos:
 
- video_id = v["id"]
- title = v["title"]
+ if not v:
+  continue
+
+ video_id = v.get("id")
+ title = v.get("title")
+
+ if not video_id:
+  continue
 
  url = f"https://youtube.com/watch?v={video_id}"
 
@@ -68,6 +72,8 @@ for v in videos:
    "thumbnail":f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
   })
 
+print(f"Videos matched categories: {len(catalog)}")
+
 os.makedirs("catalog/pages",exist_ok=True)
 os.makedirs("catalog/categories",exist_ok=True)
 
@@ -81,6 +87,6 @@ for i,page in enumerate(pages,1):
 for cat,ids in categories.items():
 
  with open(f"catalog/categories/{cat}.json","w") as f:
-  json.dump(ids,f)
+  json.dump(ids,f,indent=2)
 
 print("Catalog created")
