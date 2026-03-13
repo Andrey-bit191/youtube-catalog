@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 
-CHANNEL = "https://www.youtube.com/channel/UCdODFw-zhvUGCgc3QsnAagw"
+CHANNEL = "https://www.youtube.com/channel/UCdODFw-zhvUGCgc3QsnAagw/videos"
 
 CATEGORIES = {
  "master": "#Master",
@@ -19,7 +19,7 @@ PAGE_SIZE = 20
 print("Scanning channel...")
 
 result = subprocess.run(
- ["yt-dlp","--dump-json","--flat-playlist",CHANNEL],
+ ["yt-dlp","--dump-json","--flat-playlist","--playlist-end","2000",CHANNEL],
  capture_output=True,
  text=True
 )
