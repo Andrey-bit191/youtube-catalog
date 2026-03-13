@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 
-CHANNEL = "https://www.youtube.com/@PulseSignalOfficial"
+CHANNEL = "https://www.youtube.com/channel/UCdODFw-zhvUGCgc3QsnAagw"
 
 CATEGORIES = {
  "master": "#Master",
