@@ -1,18 +1,19 @@
 import json
 import subprocess
 import os
+import re
 
 CHANNEL = "https://www.youtube.com/@PulseSignalOfficial/videos"
 
-CATEGORIES = {
- "master": "#Master",
- "remaster": "#Remaster",
- "live": "#Live",
- "jungle": "#Jungle",
- "club": "#Club",
- "dance": "#Dance",
- "piano": "#Piano"
-}
+CATEGORIES = [
+ "Master",
+ "Remaster",
+ "Live",
+ "Jungle",
+ "Club",
+ "Dance",
+ "Piano"
+]
 
 PAGE_SIZE = 20
 
@@ -25,11 +26,10 @@ result = subprocess.run(
 )
 
 data = json.loads(result.stdout)
-
 videos = data.get("entries", [])
 
 catalog = []
-categories = {k: [] for k in CATEGORIES}
+categories = {c.lower(): [] for c in CATEGORIES}
 
 for v in videos:
 
@@ -37,42 +37,31 @@ for v in videos:
   continue
 
  video_id = v.get("id")
- title = v.get("title")
+ title = v.get("title","")
 
  if not video_id:
   continue
 
- url = f"https://youtube.com/watch?v={video_id}"
-
- desc = subprocess.run(
-  ["yt-dlp","--dump-json",url],
-  capture_output=True,
-  text=True
- )
-
- try:
-  info = json.loads(desc.stdout)
-  description = info.get("description","")
- except:
-  description = ""
-
  video_categories = []
 
- for cat,tag in CATEGORIES.items():
-  if tag.lower() in description.lower():
-   video_categories.append(cat)
-   categories[cat].append(video_id)
+ for cat in CATEGORIES:
+
+  pattern = r"\(" + cat + r"\)"
+  if re.search(pattern,title,re.IGNORECASE):
+
+   video_categories.append(cat.lower())
+   categories[cat.lower()].append(video_id)
 
  if video_categories:
 
   catalog.append({
-   "id":video_id,
-   "title":title,
-   "category":video_categories,
-   "thumbnail":f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+   "id": video_id,
+   "title": title,
+   "category": video_categories,
+   "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
   })
 
-print(f"Videos matched categories: {len(catalog)}")
+print(f"Videos categorized: {len(catalog)}")
 
 os.makedirs("catalog/pages",exist_ok=True)
 os.makedirs("catalog/categories",exist_ok=True)
