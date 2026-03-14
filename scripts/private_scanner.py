@@ -4,57 +4,55 @@ import re
 import os
 
 CATEGORIES = [
- "Master",
- "Remaster",
- "Live",
- "Jungle",
- "Club",
- "Dance",
- "Piano"
+    "Master",
+    "Remaster",
+    "Live",
+    "Jungle",
+    "Club",
+    "Dance",
+    "Piano"
 ]
 
 LINKS_FILE = "private_links.txt"
 OUTPUT_FILE = "catalog/private_videos.json"
 
+
 def detect_category(title):
-
- result = []
-
- for cat in CATEGORIES:
-
-  pattern = r"\(" + cat + r"\)"
-
-  if re.search(pattern,title,re.IGNORECASE):
-   result.append(cat.lower())
-
- return result
+    result = []
+    for cat in CATEGORIES:
+        pattern = r"\(" + cat + r"\)"
+        if re.search(pattern, title, re.IGNORECASE):
+            result.append(cat.lower())
+    return result
 
 
+# Проверяем наличие файла со ссылками
 if not os.path.exists(LINKS_FILE):
+    print("private_links.txt not found")
+    exit()
 
- print("private_links.txt not found")
- exit()
-
-
+# Читаем ссылки
 with open(LINKS_FILE) as f:
- links = [l.strip() for l in f.readlines() if l.strip()]
+    links = [l.strip() for l in f.readlines() if l.strip()]
 
-
+# Загружаем существующие private видео
 private_videos = []
 
 if os.path.exists(OUTPUT_FILE):
-
- with open(OUTPUT_FILE) as f:
-  private_videos = json.load(f)
-
+    with open(OUTPUT_FILE) as f:
+        try:
+            private_videos = json.load(f)
+        except:
+            private_videos = []
 
 existing_ids = {v["id"] for v in private_videos}
 
+# Сканируем ссылки
 for link in links:
 
     print("Scanning:", link)
 
-    # извлекаем ID видео из разных типов ссылок
+    # извлекаем ID из разных форматов ссылок
     if "watch?v=" in link:
         video_id = link.split("watch?v=")[-1]
 
@@ -65,57 +63,45 @@ for link in links:
         print("Unknown link format:", link)
         continue
 
- if "watch?v=" in link:
- video_id = link.split("watch?v=")[-1]
+    if video_id in existing_ids:
+        print("Already exists:", video_id)
+        continue
 
-elif "youtu.be/" in link:
- video_id = link.split("youtu.be/")[-1]
+    # получаем данные видео через yt-dlp
+    process = subprocess.run(
+        ["yt-dlp", "--dump-json", link],
+        capture_output=True,
+        text=True
+    )
 
-else:
- print("Unknown link format:", link)
- continue
+    try:
+        data = json.loads(process.stdout)
+        title = data.get("title", "")
 
- if video_id in existing_ids:
-  print("Already exists:",video_id)
-  continue
+        cats = detect_category(title)
 
- process = subprocess.run(
-  ["yt-dlp","--dump-json",link],
-  capture_output=True,
-  text=True
- )
+        if not cats:
+            print("No category detected:", title)
+            continue
 
- try:
+        video = {
+            "id": video_id,
+            "title": title,
+            "category": cats
+        }
 
-  data = json.loads(process.stdout)
+        private_videos.append(video)
 
-  title = data.get("title","")
+        print("Added:", title, cats)
 
-  cats = detect_category(title)
-
-  if not cats:
-   print("No category detected:",title)
-   continue
-
-  video = {
-   "id": video_id,
-   "title": title,
-   "category": cats
-  }
-
-  private_videos.append(video)
-
-  print("Added:",title,cats)
-
- except:
-
-  print("Error reading video:",link)
+    except:
+        print("Error reading video:", link)
 
 
-os.makedirs("catalog",exist_ok=True)
+# сохраняем файл
+os.makedirs("catalog", exist_ok=True)
 
-with open(OUTPUT_FILE,"w") as f:
- json.dump(private_videos,f,indent=2)
+with open(OUTPUT_FILE, "w") as f:
+    json.dump(private_videos, f, indent=2)
 
-
-print("Private videos updated:",len(private_videos))
+print("Private videos updated:", len(private_videos))
