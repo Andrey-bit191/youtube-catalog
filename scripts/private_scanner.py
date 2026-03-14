@@ -54,7 +54,15 @@ for link in links:
 
  print("Scanning:",link)
 
- video_id = link.split("v=")[-1]
+ if "watch?v=" in link:
+ video_id = link.split("watch?v=")[-1]
+
+elif "youtu.be/" in link:
+ video_id = link.split("youtu.be/")[-1]
+
+else:
+ print("Unknown link format:", link)
+ continue
 
  if video_id in existing_ids:
   print("Already exists:",video_id)
