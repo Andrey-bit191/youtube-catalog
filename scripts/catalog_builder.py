@@ -49,6 +49,23 @@ for line in lines:
 catalog = []
 categories = {c.lower(): [] for c in CATEGORIES}
 
+
+def detect_category(title):
+
+ result = []
+
+ for cat in CATEGORIES:
+
+  pattern = r"\(" + cat + r"\)"
+
+  if re.search(pattern,title,re.IGNORECASE):
+   result.append(cat.lower())
+
+ return result
+
+
+# PUBLIC VIDEOS
+
 for v in videos:
 
  video_id = v.get("id")
@@ -57,44 +74,67 @@ for v in videos:
  if not video_id:
   continue
 
- video_categories = []
+ cats = detect_category(title)
 
- for cat in CATEGORIES:
-
-  pattern = r"\(" + cat + r"\)"
-
-  if re.search(pattern,title,re.IGNORECASE):
-
-   video_categories.append(cat.lower())
-   categories[cat.lower()].append(video_id)
-
- if video_categories:
+ if cats:
 
   catalog.append({
    "id": video_id,
    "title": title,
-   "category": video_categories,
+   "category": cats,
    "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
   })
 
+  for c in cats:
+   categories[c].append(video_id)
 
-print(f"Videos categorized: {len(catalog)}")
+
+# PRIVATE VIDEOS
+
+private_path = "catalog/private_videos.json"
+
+if os.path.exists(private_path):
+
+ with open(private_path) as f:
+  private_videos = json.load(f)
+
+ for v in private_videos:
+
+  video_id = v["id"]
+  title = v["title"]
+  cats = v["category"]
+
+  catalog.append({
+   "id": video_id,
+   "title": title,
+   "category": cats,
+   "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+  })
+
+  for c in cats:
+   categories[c].append(video_id)
+
+
+print("Videos categorized:",len(catalog))
 
 os.makedirs("catalog/pages", exist_ok=True)
 os.makedirs("catalog/categories", exist_ok=True)
 
-pages = [catalog[i:i+PAGE_SIZE] for i in range(0, len(catalog), PAGE_SIZE)]
+pages = [catalog[i:i+PAGE_SIZE] for i in range(0,len(catalog),PAGE_SIZE)]
 
-for i, page in enumerate(pages, 1):
+for i,page in enumerate(pages,1):
 
  with open(f"catalog/pages/page{i}.json","w") as f:
   json.dump(page,f,indent=2)
 
 
-for cat, ids in categories.items():
+for cat,ids in categories.items():
 
  with open(f"catalog/categories/{cat}.json","w") as f:
   json.dump(ids,f,indent=2)
 
+
+with open("catalog/catalog.json","w") as f:
+ json.dump(catalog,f,indent=2)
 
 print("Catalog created")
