@@ -19,7 +19,6 @@ PAGE_SIZE = 20
 
 print("Scanning channel...")
 
-# получаем список видео
 process = subprocess.run(
  [
   "yt-dlp",
@@ -46,6 +45,7 @@ for line in lines:
  except:
   continue
 
+
 catalog = []
 categories = {c.lower(): [] for c in CATEGORIES}
 
@@ -62,6 +62,7 @@ for v in videos:
  for cat in CATEGORIES:
 
   pattern = r"\(" + cat + r"\)"
+
   if re.search(pattern,title,re.IGNORECASE):
 
    video_categories.append(cat.lower())
@@ -70,4 +71,30 @@ for v in videos:
  if video_categories:
 
   catalog.append({
-   "
+   "id": video_id,
+   "title": title,
+   "category": video_categories,
+   "thumbnail": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+  })
+
+
+print(f"Videos categorized: {len(catalog)}")
+
+os.makedirs("catalog/pages", exist_ok=True)
+os.makedirs("catalog/categories", exist_ok=True)
+
+pages = [catalog[i:i+PAGE_SIZE] for i in range(0, len(catalog), PAGE_SIZE)]
+
+for i, page in enumerate(pages, 1):
+
+ with open(f"catalog/pages/page{i}.json","w") as f:
+  json.dump(page,f,indent=2)
+
+
+for cat, ids in categories.items():
+
+ with open(f"catalog/categories/{cat}.json","w") as f:
+  json.dump(ids,f,indent=2)
+
+
+print("Catalog created")
