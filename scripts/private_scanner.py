@@ -52,7 +52,18 @@ existing_ids = {v["id"] for v in private_videos}
 
 for link in links:
 
- print("Scanning:",link)
+    print("Scanning:", link)
+
+    # извлекаем ID видео из разных типов ссылок
+    if "watch?v=" in link:
+        video_id = link.split("watch?v=")[-1]
+
+    elif "youtu.be/" in link:
+        video_id = link.split("youtu.be/")[-1]
+
+    else:
+        print("Unknown link format:", link)
+        continue
 
  if "watch?v=" in link:
  video_id = link.split("watch?v=")[-1]
