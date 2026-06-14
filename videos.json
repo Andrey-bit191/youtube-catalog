@@ -1,5 +1,11 @@
 [
   {
+    "videoId": "Q2wEXpUkmXI",
+    "title": "Pulse Signal – Signal under the noise",
+    "thumbnail": "https://img.youtube.com/vi/Q2wEXpUkmXI/hqdefault.jpg",
+    "url": "https://youtube.com/watch?v=Q2wEXpUkmXI"
+  },
+  {
     "videoId": "MQJTrJV6drM",
     "title": "Pulse Signal – Everybody borrowed",
     "thumbnail": "https://img.youtube.com/vi/MQJTrJV6drM/hqdefault.jpg",
@@ -82,11 +88,5 @@
     "title": "Pulse Signal – Mama knows",
     "thumbnail": "https://img.youtube.com/vi/Ca52FWAQG9U/hqdefault.jpg",
     "url": "https://youtube.com/watch?v=Ca52FWAQG9U"
-  },
-  {
-    "videoId": "mFXoh9x-mRc",
-    "title": "Pulse Signal – Still Human",
-    "thumbnail": "https://img.youtube.com/vi/mFXoh9x-mRc/hqdefault.jpg",
-    "url": "https://youtube.com/watch?v=mFXoh9x-mRc"
   }
 ]
